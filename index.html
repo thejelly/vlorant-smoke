@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>无畏契约 · 烟雾点位指南</title>
+  <meta name="description" content="VALORANT 各地图进攻方与防守方烟雾点位速查指南" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1 class="logo">无畏契约 <span>烟雾点位指南</span></h1>
+      <p class="tagline">选择地图与阵营,查看常用下烟点位</p>
+    </div>
+  </header>
+
+  <main class="container">
+    <!-- 地图选择 -->
+    <section class="controls">
+      <div class="control-group">
+        <label class="control-label">地图</label>
+        <div id="map-tabs" class="map-tabs" role="tablist" aria-label="地图选择"></div>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">阵营</label>
+        <div class="side-toggle" role="tablist" aria-label="阵营选择">
+          <button class="side-btn is-active" data-side="attack" role="tab" aria-selected="true">
+            ⚔️ 进攻方
+          </button>
+          <button class="side-btn" data-side="defense" role="tab" aria-selected="false">
+            🛡️ 防守方
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 主体:示意图 + 点位列表 -->
+    <section class="content">
+      <div class="map-panel">
+        <div class="map-panel-header">
+          <h2 id="map-title">—</h2>
+          <span id="side-badge" class="side-badge attack">进攻方</span>
+        </div>
+        <div id="map-diagram" class="map-diagram" aria-label="点位示意图">
+          <!-- 点位标记由脚本注入 -->
+        </div>
+        <p class="diagram-hint">示意图为抽象布局:上=A 侧 / 下=B(或 C)侧,点击标记查看详情。</p>
+      </div>
+
+      <div class="list-panel">
+        <div class="list-header">
+          <h2>点位列表</h2>
+          <span id="spot-count" class="count-badge">0</span>
+        </div>
+        <ul id="spot-list" class="spot-list"></ul>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <p>数据为常见通用点位示意,仅供参考学习。VALORANT 为 Riot Games 商标,本页面与其无官方关联。</p>
+  </footer>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
