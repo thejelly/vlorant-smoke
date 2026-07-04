@@ -23,7 +23,19 @@
     list: document.getElementById("spot-list"),
     count: document.getElementById("spot-count"),
     resetBtn: document.getElementById("reset-3d"),
+    srStatus: document.getElementById("sr-status"),
   };
+
+  // WebGL 支持检测(不支持则禁用 3D 视图,避免空白面板)
+  function webglSupported() {
+    try {
+      const c = document.createElement("canvas");
+      return !!(window.WebGLRenderingContext && (c.getContext("webgl2") || c.getContext("webgl")));
+    } catch (e) {
+      return false;
+    }
+  }
+  const canUse3D = webglSupported();
 
   // 转义,避免文字破坏 HTML 属性/内容
   function esc(s) {
@@ -44,6 +56,7 @@
       const btn = document.createElement("button");
       btn.className = "map-tab" + (key === state.map ? " is-active" : "");
       btn.setAttribute("role", "tab");
+      btn.setAttribute("aria-selected", key === state.map ? "true" : "false");
       btn.dataset.map = key;
       btn.innerHTML = `${esc(map.name)}<small>${esc(map.nameZh)}</small>`;
       btn.addEventListener("click", () => {
@@ -68,11 +81,17 @@
       m.classList.toggle("is-active", m.dataset.id === state.activeSpot);
     });
     document.querySelectorAll(".spot-item").forEach((s) => {
-      s.classList.toggle("is-active", s.dataset.id === state.activeSpot);
+      const on = s.dataset.id === state.activeSpot;
+      s.classList.toggle("is-active", on);
+      s.setAttribute("aria-pressed", on ? "true" : "false");
     });
     if (state.activeSpot) {
       const item = document.querySelector(`.spot-item[data-id="${state.activeSpot}"]`);
       if (item) item.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      const spot = currentSpots().find((s) => s.id === state.activeSpot);
+      if (spot && els.srStatus) els.srStatus.textContent = `已选中:${spot.name}(${spot.area})`;
+    } else if (els.srStatus) {
+      els.srStatus.textContent = "";
     }
   }
 
@@ -107,6 +126,10 @@
       const li = document.createElement("li");
       li.className = "spot-item";
       li.dataset.id = spot.id;
+      li.tabIndex = 0;
+      li.setAttribute("role", "button");
+      li.setAttribute("aria-pressed", "false");
+      li.setAttribute("aria-label", `${spot.name},${spot.area}`);
       li.innerHTML = `
         <div class="spot-item-head">
           <span class="spot-num ${state.side}">${i + 1}</span>
@@ -116,12 +139,31 @@
         <div class="spot-purpose">${esc(spot.purpose)}</div>
       `;
       li.addEventListener("click", () => setActiveSpot(spot.id));
+      li.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          setActiveSpot(spot.id);
+        }
+      });
       els.list.appendChild(li);
     });
   }
 
   /* ---------- 视图切换 ---------- */
   function applyView() {
+    // 若切到 3D 但初始化失败(无 WebGL),回退到 2D
+    if (state.view === "3d" && window.Viewer3D) {
+      const ok = window.Viewer3D.show();
+      if (ok) {
+        window.Viewer3D.update(getState());
+      } else {
+        state.view = "2d";
+        if (els.srStatus) els.srStatus.textContent = "当前浏览器不支持 3D 视图,已切回 2D 平面视图。";
+      }
+    } else if (state.view === "3d" && !window.Viewer3D) {
+      state.view = "2d"; // 3D 模块尚未就绪
+    }
+
     const is3d = state.view === "3d";
     els.diagram.hidden = is3d;
     els.panel3d.hidden = !is3d;
@@ -132,15 +174,12 @@
       b.classList.toggle("is-active", active);
       b.setAttribute("aria-selected", active ? "true" : "false");
     });
-    if (is3d) {
-      if (window.Viewer3D) { window.Viewer3D.show(); window.Viewer3D.update(getState()); }
-    } else {
-      if (window.Viewer3D) window.Viewer3D.hide();
-    }
+    if (!is3d && window.Viewer3D) window.Viewer3D.hide();
   }
 
   function switchView(v) {
     if (state.view === v) return;
+    if (v === "3d" && !canUse3D) return;
     state.view = v;
     applyView();
   }
@@ -151,7 +190,9 @@
     const spots = currentSpots();
 
     document.querySelectorAll(".map-tab").forEach((t) => {
-      t.classList.toggle("is-active", t.dataset.map === state.map);
+      const on = t.dataset.map === state.map;
+      t.classList.toggle("is-active", on);
+      t.setAttribute("aria-selected", on ? "true" : "false");
     });
     els.sideBtns.forEach((b) => {
       const active = b.dataset.side === state.side;
@@ -186,7 +227,14 @@
     });
   });
   els.viewBtns.forEach((btn) => {
-    btn.addEventListener("click", () => switchView(btn.dataset.view));
+    if (btn.dataset.view === "3d" && !canUse3D) {
+      btn.disabled = true;
+      btn.title = "当前浏览器 / 设备不支持 3D";
+    }
+    btn.addEventListener("click", () => {
+      if (btn.disabled) return;
+      switchView(btn.dataset.view);
+    });
   });
   if (els.resetBtn) {
     els.resetBtn.addEventListener("click", () => {

@@ -214,6 +214,8 @@ body {
 }
 .map-3d[hidden] { display: none; }
 .map-3d canvas { display: block; width: 100% !important; height: 100% !important; }
+.map-3d canvas { cursor: grab; }
+.map-3d canvas:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 .map3d-btn {
   position: absolute;
   top: 10px;
@@ -230,6 +232,47 @@ body {
   transition: all 0.15s ease;
 }
 .map3d-btn:hover { border-color: var(--accent); color: #fff; }
+
+/* 3D 载入 / 错误 / 不支持提示 */
+.map3d-status {
+  position: absolute;
+  inset: auto 0 0 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  margin: 0 auto;
+  max-width: 80%;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  padding: 10px 16px;
+  pointer-events: none;
+}
+
+/* 屏幕阅读器专用(视觉隐藏) */
+.sr-only {
+  position: absolute;
+  width: 1px; height: 1px;
+  padding: 0; margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 禁用态视图按钮 */
+.view-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+/* 键盘焦点可见 */
+.map-tab:focus-visible,
+.side-btn:focus-visible,
+.view-btn:focus-visible,
+.spot-item:focus-visible,
+.marker:focus-visible,
+.map3d-btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 .marker {
   position: absolute;
@@ -321,4 +364,14 @@ body {
 @media (max-width: 860px) {
   .content { grid-template-columns: 1fr; }
   .logo { font-size: 1.5rem; }
+}
+
+/* 尊重系统「减少动态效果」偏好 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }
