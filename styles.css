@@ -155,34 +155,44 @@ body {
 .map-diagram {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 1 / 1;
   background:
-    linear-gradient(0deg, rgba(74,159,255,0.06), rgba(255,107,74,0.06)),
+    radial-gradient(circle at 50% 40%, rgba(255,255,255,0.03), transparent 70%),
     var(--bg-elev-2);
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
   background-image:
-    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 100% 100%, 32px 32px, 32px 32px;
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 25px 25px, 25px 25px;
 }
-.map-diagram::before {
-  content: "A 侧";
-  position: absolute; top: 8px; left: 50%; transform: translateX(-50%);
-  color: var(--text-dim); font-size: 0.75rem; letter-spacing: 2px;
+
+/* Map SVG layer */
+.map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.mp-line { stroke: rgba(255,255,255,0.10); stroke-width: 2.4; stroke-linecap: round; }
+.mp-site {
+  fill: color-mix(in srgb, var(--mc, #888) 16%, transparent);
+  stroke: var(--mc, #fff);
+  stroke-width: 0.7;
 }
-.map-diagram::after {
-  content: "B / C 侧";
-  position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%);
-  color: var(--text-dim); font-size: 0.75rem; letter-spacing: 2px;
-}
+.mp-site-t { fill: #fff; font-size: 8px; font-weight: 800; text-anchor: middle; dominant-baseline: central; }
+.mp-mid { fill: rgba(120,150,200,0.12); stroke: rgba(255,255,255,0.14); stroke-width: 0.4; }
+.mp-path { fill: rgba(255,255,255,0.045); stroke: rgba(255,255,255,0.10); stroke-width: 0.3; }
+.mp-spawn { fill: none; stroke: rgba(255,255,255,0.22); stroke-width: 0.5; stroke-dasharray: 2 1.6; }
+.mp-zone-t { fill: var(--text-dim); font-size: 3.6px; text-anchor: middle; dominant-baseline: central; letter-spacing: 0.3px; }
+.mp-zone-t.sm { font-size: 3px; }
+.mp-tp { fill: rgba(180,120,220,0.28); stroke: #b06fc9; stroke-width: 0.5; }
+.mp-tp-t { fill: #fff; font-size: 2.8px; font-weight: 700; text-anchor: middle; dominant-baseline: central; }
+.mp-label { fill: var(--text-dim); font-size: 3.2px; text-anchor: middle; dominant-baseline: central; }
 
 .marker {
   position: absolute;
   transform: translate(-50%, -50%);
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  font-family: inherit;
   border-radius: 50%;
   border: 2px solid #fff;
   display: flex;
@@ -193,7 +203,7 @@ body {
   color: #fff;
   cursor: pointer;
   transition: transform 0.12s ease, box-shadow 0.12s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
 }
 .marker:hover, .marker.is-active {
   transform: translate(-50%, -50%) scale(1.25);

@@ -62,18 +62,58 @@
     }
   }
 
+  // 转义,避免标签文字破坏 SVG/HTML
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, (c) =>
+      ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])
+    );
+  }
+
+  // 根据 layout.shapes 生成地图 SVG
+  function buildMapSvg() {
+    const map = SMOKE_DATA[state.map];
+    const shapes = (map.layout && map.layout.shapes) || [];
+    let inner = "";
+    shapes.forEach((s) => {
+      const t = s[0];
+      if (t === "line") {
+        inner += `<line class="mp-line" x1="${s[1]}" y1="${s[2]}" x2="${s[3]}" y2="${s[4]}"/>`;
+      } else if (t === "site") {
+        const [, x, y, w, h, l] = s;
+        inner += `<rect class="mp-site" x="${x}" y="${y}" width="${w}" height="${h}" rx="2"/>`;
+        inner += `<text class="mp-site-t" x="${x + w / 2}" y="${y + h / 2}">${esc(l)}</text>`;
+      } else if (t === "mid") {
+        const [, x, y, w, h, l] = s;
+        inner += `<rect class="mp-mid" x="${x}" y="${y}" width="${w}" height="${h}" rx="1.5"/>`;
+        if (l) inner += `<text class="mp-zone-t" x="${x + w / 2}" y="${y + h / 2}">${esc(l)}</text>`;
+      } else if (t === "path") {
+        const [, x, y, w, h, l] = s;
+        inner += `<rect class="mp-path" x="${x}" y="${y}" width="${w}" height="${h}" rx="1"/>`;
+        if (l) inner += `<text class="mp-zone-t sm" x="${x + w / 2}" y="${y + h / 2}">${esc(l)}</text>`;
+      } else if (t === "spawn") {
+        const [, x, y, w, h, l] = s;
+        inner += `<rect class="mp-spawn" x="${x}" y="${y}" width="${w}" height="${h}" rx="1"/>`;
+        inner += `<text class="mp-zone-t sm" x="${x + w / 2}" y="${y + h / 2}">${esc(l)}</text>`;
+      } else if (t === "tp") {
+        const [, x, y, l] = s;
+        inner += `<circle class="mp-tp" cx="${x}" cy="${y}" r="3.6"/>`;
+        inner += `<text class="mp-tp-t" x="${x}" y="${y}">${esc(l || "TP")}</text>`;
+      } else if (t === "label") {
+        const [, x, y, l] = s;
+        inner += `<text class="mp-label" x="${x}" y="${y}">${esc(l)}</text>`;
+      }
+    });
+    return `<svg class="map-svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet" style="--mc:${map.color}" aria-hidden="true">${inner}</svg>`;
+  }
+
   function renderDiagram(spots) {
-    els.diagram.innerHTML = "";
+    let markers = "";
     spots.forEach((spot, i) => {
-      const marker = document.createElement("div");
-      marker.className = "marker " + state.side;
-      marker.dataset.id = spot.id;
-      marker.style.left = spot.x + "%";
-      marker.style.top = spot.y + "%";
-      marker.textContent = i + 1;
-      marker.title = spot.name;
-      marker.addEventListener("click", () => setActiveSpot(spot.id));
-      els.diagram.appendChild(marker);
+      markers += `<button class="marker ${state.side}" data-id="${esc(spot.id)}" style="left:${spot.x}%;top:${spot.y}%" title="${esc(spot.name)}">${i + 1}</button>`;
+    });
+    els.diagram.innerHTML = buildMapSvg() + markers;
+    els.diagram.querySelectorAll(".marker").forEach((m) => {
+      m.addEventListener("click", () => setActiveSpot(m.dataset.id));
     });
   }
 
