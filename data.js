@@ -184,3 +184,6 @@ const SMOKE_DATA = {
     ],
   },
 };
+
+// 供 ES 模块(3D 视图)读取
+if (typeof window !== "undefined") window.SMOKE_DATA = SMOKE_DATA;

@@ -34,6 +34,18 @@
           </button>
         </div>
       </div>
+
+      <div class="control-group">
+        <label class="control-label">视图</label>
+        <div class="view-toggle" role="tablist" aria-label="视图选择">
+          <button class="view-btn is-active" data-view="2d" role="tab" aria-selected="true">
+            🗺️ 2D 平面
+          </button>
+          <button class="view-btn" data-view="3d" role="tab" aria-selected="false">
+            🧊 3D 立体
+          </button>
+        </div>
+      </div>
     </section>
 
     <!-- 主体:示意图 + 点位列表 -->
@@ -46,7 +58,12 @@
         <div id="map-diagram" class="map-diagram" aria-label="点位示意图">
           <!-- 点位标记由脚本注入 -->
         </div>
-        <p class="diagram-hint">游戏官方小地图俯视图,橙/蓝色编号标记为下烟点位。点击标记或右侧列表查看详情。</p>
+        <div id="map-3d" class="map-3d" aria-label="3D 立体地图" hidden>
+          <button id="reset-3d" class="map3d-btn" type="button" title="复位视角">⟲ 复位视角</button>
+          <!-- three.js 画布由脚本注入 -->
+        </div>
+        <p id="hint-2d" class="diagram-hint">游戏官方小地图俯视图,橙/蓝色编号标记为下烟点位。点击标记或右侧列表查看详情。</p>
+        <p id="hint-3d" class="diagram-hint" hidden>立体沙盘:烟柱为下烟点位(橙=进攻 / 蓝=防守)。拖动旋转 · 滚轮缩放 · 右键平移,点击烟柱或右侧列表查看详情。</p>
       </div>
 
       <div class="list-panel">
@@ -65,5 +82,16 @@
 
   <script src="data.js"></script>
   <script src="app.js"></script>
+
+  <!-- 3D 视图(three.js,本地 vendor,支持离线) -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./vendor/three.module.min.js",
+        "three/addons/": "./vendor/jsm/"
+      }
+    }
+  </script>
+  <script type="module" src="three-view.js"></script>
 </body>
 </html>
